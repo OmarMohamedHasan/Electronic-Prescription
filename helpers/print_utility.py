@@ -1,0 +1,91 @@
+from reportlab.lib.pagesizes import A4
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Image, Table, TableStyle
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.enums import TA_RIGHT, TA_CENTER
+from reportlab.lib.units import cm
+from reportlab.lib import colors
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
+import os
+from datetime import datetime
+
+# Register Arabic font
+pdfmetrics.registerFont(TTFont("ArabicFont", os.path.join(os.path.dirname(os.path.dirname(__file__)), "assets", "NotoSansArabic-Regular.ttf")))
+pdfmetrics.registerFont(TTFont("ArabicFont-Bold", os.path.join(os.path.dirname(os.path.dirname(__file__)), "assets", "NotoSansArabic-Regular.ttf")))
+
+styles = getSampleStyleSheet()
+styles.add(ParagraphStyle(name='ArabicNormal', fontName='ArabicFont', fontSize=12, leading=14, alignment=TA_RIGHT))
+styles.add(ParagraphStyle(name='ArabicHeading', fontName='ArabicFont-Bold', fontSize=16, leading=18, alignment=TA_CENTER))
+styles.add(ParagraphStyle(name='ArabicSubHeading', fontName='ArabicFont-Bold', fontSize=14, leading=16, alignment=TA_RIGHT))
+
+def generate_prescription_pdf(file_path, prescription_data, clinic_settings, print_settings):
+    doc = SimpleDocTemplate(file_path, pagesize=A4)
+    story = []
+
+    # Clinic Header
+    if clinic_settings:
+        logo_path = clinic_settings[3] # logo_path
+        doctor_name = clinic_settings[0] # doctor_name
+        clinic_address = clinic_settings[1] # clinic_address
+        phone_numbers = clinic_settings[2] # phone_numbers
+
+        header_elements = []
+        if logo_path and os.path.exists(logo_path):
+            img = Image(logo_path, width=3*cm, height=3*cm)
+            # Position logo based on print_settings
+            if print_settings and print_settings[0] == "أعلى الوسط":
+                img.hAlign = 'CENTER'
+            elif print_settings and print_settings[0] == "أعلى اليسار":
+                img.hAlign = 'LEFT'
+            else: # Default to top right
+                img.hAlign = 'RIGHT'
+            header_elements.append(img)
+
+        if doctor_name:
+            header_elements.append(Paragraph(f"دكتور: {doctor_name}", styles['ArabicHeading']))
+        if clinic_address:
+            header_elements.append(Paragraph(f"العنوان: {clinic_address}", styles['ArabicNormal']))
+        if phone_numbers:
+            header_elements.append(Paragraph(f"للتواصل: {phone_numbers}", styles['ArabicNormal']))
+        
+        for elem in header_elements:
+            story.append(elem)
+        story.append(Spacer(1, 0.5*cm))
+
+    # Prescription Details
+    story.append(Paragraph(f"اسم المريض: {prescription_data['patient_name']}", styles['ArabicNormal']))
+    story.append(Paragraph(f"التاريخ: {prescription_data['date']}", styles['ArabicNormal']))
+    story.append(Spacer(1, 0.2*cm))
+    story.append(Paragraph(f"التشخيص: {prescription_data['diagnosis']}", styles['ArabicNormal']))
+    story.append(Spacer(1, 0.5*cm))
+
+    # Medicines Table
+    data = [['الدواء', 'الجرعة', 'المدة', 'التعليمات']]
+    for item in prescription_data['medicines']:
+        data.append([item['medicine_name'], item['dosage'], item['duration'], item['instructions']])
+
+    table = Table(data, colWidths=[4*cm, 3*cm, 3*cm, 6*cm])
+    table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('FONTNAME', (0, 0), (-1, 0), 'ArabicFont-Bold'),
+        ('FONTNAME', (0, 1), (-1, -1), 'ArabicFont'),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+        ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+        ('GRID', (0, 0), (-1, -1), 1, colors.black),
+    ]))
+    story.append(table)
+    story.append(Spacer(1, 1*cm))
+
+    # Doctor Signature (Optional)
+    if clinic_settings and clinic_settings[4] and os.path.exists(clinic_settings[4]): # signature_path
+        if print_settings and print_settings[1] != "النموذج 2 (بدون توقيع)":
+            signature_img = Image(clinic_settings[4], width=4*cm, height=2*cm)
+            signature_img.hAlign = 'RIGHT'
+            story.append(signature_img)
+            story.append(Paragraph("توقيع الطبيب", styles['ArabicNormal']))
+
+    doc.build(story)
+
+

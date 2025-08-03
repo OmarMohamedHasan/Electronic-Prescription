@@ -1,0 +1,55 @@
+/* Stylesheet (QSS) for UI customization */
+
+QTableWidget {
+    selection-background-color: #3498db; /* Darker blue for selection background */
+    selection-color: black; /* Black text on selection */
+    gridline-color: #bdc3c7;
+    background-color: white;
+    alternate-background-color: #f8f9fa;
+}
+
+QTableWidget::item {
+    padding: 8px;
+    border-bottom: 1px solid #ecf0f1;
+}
+
+QHeaderView::section {
+    background-color: #34495e;
+    color: white;
+    padding: 10px;
+    border: none;
+    font-weight: bold;
+}
+
+QPushButton {
+    min-width: 60px; /* Ensure buttons have a minimum width */
+    min-height: 25px; /* Ensure buttons have a minimum height */
+}
+
+/* Specific styles for edit buttons in tables */
+QPushButton[text="تعديل"] {
+    background-color: #3498db;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 3px;
+    font-size: 12px;
+}
+QPushButton[text="تعديل"]:hover {
+    background-color: #2980b9;
+}
+
+/* Specific styles for delete buttons in tables */
+QPushButton[text="حذف"] {
+    background-color: #e74c3c;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 3px;
+    font-size: 12px;
+}
+QPushButton[text="حذف"]:hover {
+    background-color: #c0392b;
+}
+
+
