@@ -2,6 +2,9 @@
 
 QTableWidget {
     selection-background-color: #3498db; /* Darker blue for selection background */
+    padding: 10px;
+    min-width: 200px; /* Ensure buttons have a minimum width */
+    min-height: 200px; /* Ensure buttons have a minimum height */
     selection-color: black; /* Black text on selection */
     gridline-color: #bdc3c7;
     background-color: white;

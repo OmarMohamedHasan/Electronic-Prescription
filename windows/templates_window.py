@@ -18,14 +18,14 @@ class TemplatesWindow(QWidget):
 
     def init_ui(self):
         layout = QVBoxLayout()
-        layout.setContentsMargins(20, 20, 20, 20)
-        layout.setSpacing(15)
+        layout.setContentsMargins(20, 20, 20, 250) # Further reduced margins
+        layout.setSpacing(5) # Further reduced spacing
 
         # Title
         title = QLabel("أسطمبة الأدوية")
         title.setFont(QFont("Arial", 18, QFont.Bold))
         title.setAlignment(Qt.AlignCenter)
-        title.setStyleSheet("color: #2c3e50; margin-bottom: 10px;")
+        title.setStyleSheet("color: #2c3e50; margin-bottom: 2px;") # Further reduced margin-bottom
         layout.addWidget(title)
 
         # Create splitter for templates list and template details
@@ -34,7 +34,7 @@ class TemplatesWindow(QWidget):
         # Left side - Templates list
         left_widget = QWidget()
         left_layout = QVBoxLayout()
-        left_layout.setContentsMargins(0, 0, 10, 0)
+        left_layout.setContentsMargins(0, 0, 2, 0) # Further reduced right margin
 
         left_layout.addWidget(QLabel("قائمة الأسطمبات:"))
         
@@ -70,7 +70,7 @@ class TemplatesWindow(QWidget):
         # Right side - Template details
         right_widget = QWidget()
         right_layout = QVBoxLayout()
-        right_layout.setContentsMargins(10, 0, 0, 0)
+        right_layout.setContentsMargins(2, 0, 0, 0) # Further reduced left margin
 
         right_layout.addWidget(QLabel("تفاصيل الأسطمبة:"))
 
@@ -180,7 +180,7 @@ class TemplatesWindow(QWidget):
             row_position = self.templates_table.rowCount()
             self.templates_table.insertRow(row_position)
             self.templates_table.setItem(row_position, 0, QTableWidgetItem(template[1]))  # name
-            self.templates_table.setItem(row_position, 1, QTableWidgetItem(template[2] or ''))  # description
+            self.templates_table.setItem(row_position, 1, QTableWidgetItem(template[2] or ""))  # description
 
             # Actions buttons
             actions_layout = QHBoxLayout()
@@ -206,7 +206,7 @@ class TemplatesWindow(QWidget):
         self.medicine_combo.addItem("اختر دواء", None)
         medicines = self.drug_model.get_all_medicines()
         for medicine in medicines:
-            self.medicine_combo.addItem(f"{medicine['name']} ({medicine['form']})", medicine['id'])
+            self.medicine_combo.addItem(f"{medicine['name']} ({medicine['form']})", medicine["id"])
 
     def on_template_selected(self):
         selected_items = self.templates_table.selectedItems()
@@ -219,8 +219,8 @@ class TemplatesWindow(QWidget):
         template = self.template_model.get_template_by_id(template_id)
         if template:
             self.current_template_id = template_id
-            self.template_name_input.setText(template['name'])
-            self.template_description_input.setPlainText(template['description'] or '')
+            self.template_name_input.setText(template["name"])
+            self.template_description_input.setPlainText(template["description"] or "")
             
             # Load template medicines
             self.template_medicines_table.setRowCount(0)
@@ -367,5 +367,13 @@ class TemplatesWindow(QWidget):
             self.dosage_input.clear()
             self.form_input.clear()
             self.instructions_input.clear()
+
+
+
+
+
+
+
+
 
 

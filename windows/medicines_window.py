@@ -53,10 +53,10 @@ class AddMedicineDialog(QDialog):
 
     def get_data(self):
         return {
-            'name': self.name_input.text().strip(),
-            'dosage': self.dosage_input.text().strip(),
-            'form': self.form_input.text().strip(),
-            'instructions': self.instructions_input.text().strip()
+            "name": self.name_input.text().strip(),
+            "dosage": self.dosage_input.text().strip(),
+            "form": self.form_input.text().strip(),
+            "instructions": self.instructions_input.text().strip()
         }
 
 
@@ -70,14 +70,14 @@ class MedicinesWindow(QWidget):
 
     def init_ui(self):
         layout = QVBoxLayout()
-        layout.setContentsMargins(20, 20, 20, 20)
-        layout.setSpacing(15)
+        layout.setContentsMargins(10, 10, 10, 10) # Reduced margins
+        layout.setSpacing(10) # Reduced spacing
 
         # Title
         title = QLabel("إدارة الأدوية")
         title.setFont(QFont("Arial", 18, QFont.Bold))
         title.setAlignment(Qt.AlignCenter)
-        title.setStyleSheet("color: #2c3e50; margin-bottom: 10px;")
+        title.setStyleSheet("color: #2c3e50; margin-bottom: 5px;") # Reduced margin-bottom
         layout.addWidget(title)
 
         # Search and Add section
@@ -240,5 +240,7 @@ class MedicinesWindow(QWidget):
                 self.load_medicines()
             else:
                 QMessageBox.warning(self, "خطأ", "حدث خطأ أثناء تحديث بيانات الدواء!")
+
+
 
 

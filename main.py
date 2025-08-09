@@ -15,6 +15,10 @@ if __name__ == '__main__':
     else:
         print("⚠️ لم يتم تحميل خط NSA")
 
+    # Apply global stylesheet for consistent spacing and sizing
+    with open("assets/style.qss", "r", encoding="utf-8") as f:
+        app.setStyleSheet(f.read())
+
     window = LoginWindow()
     window.show()
     sys.exit(app.exec_())
@@ -22,4 +26,6 @@ if __name__ == '__main__':
 from database.db_init import update_database
 
 update_database()
+
+
 

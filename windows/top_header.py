@@ -7,7 +7,7 @@ class TopHeader(QWidget):
 
     def __init__(self, active="home"):
         super().__init__()
-        self.setFixedHeight(80)
+        self.setFixedHeight(30)
         self.setStyleSheet("""
             QPushButton {
                 border: none;
@@ -26,8 +26,8 @@ class TopHeader(QWidget):
         """)
 
         layout = QHBoxLayout(self)
-        layout.setContentsMargins(20, 10, 20, 0)
-        layout.setSpacing(40)
+        layout.setContentsMargins(15, 5, 15, 0)
+        layout.setSpacing(30)
 
         self.buttons = {}
 

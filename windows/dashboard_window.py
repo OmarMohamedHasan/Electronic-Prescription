@@ -2,7 +2,7 @@ from PyQt5.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QStackedWidget, Q
 from PyQt5.QtCore import Qt, QTimer, pyqtSignal
 from PyQt5.QtGui import QFont
 from windows.top_header import TopHeader
-from windows.settings_window import SettingsPage
+from windows.settings_window import SettingsWindow # Corrected import
 from windows.patients_window import PatientsWindow
 from windows.medicines_window import MedicinesWindow
 from windows.new_prescription_window import NewPrescriptionWindow
@@ -67,15 +67,16 @@ class DashboardWindow(QMainWindow):
         self.setCentralWidget(central_widget)
         self.layout = QVBoxLayout(central_widget)
         self.layout.setContentsMargins(0, 0, 0, 0)
+        self.layout.setSpacing(0) # Reduce spacing between header and content
 
         self.header = TopHeader(active="new_rx")
-        self.header.setFixedHeight(80)
+        self.header.setFixedHeight(60) # Reduce header height
         self.layout.addWidget(self.header)
 
         self.pages = QStackedWidget()
         self.layout.addWidget(self.pages)
 
-        self.settings_page = SettingsPage(current_user_id=self.user_id)
+        self.settings_page = SettingsWindow() # Removed current_user_id
 
         # self.pages.addWidget(QWidget())  # home
         self.new_prescription_page = NewPrescriptionWindow(self.user_id)
@@ -138,5 +139,9 @@ class DashboardWindow(QMainWindow):
                 new_rx_page.load_medicines_to_combo()
 
             self.pages.setCurrentIndex(self.page_map[page_key])
+
+
+
+
 
 

@@ -25,8 +25,8 @@ class LoginWindow(QWidget):
 
     def setup_ui(self):
         layout = QVBoxLayout()
-        layout.setContentsMargins(50, 30, 50, 30)
-        layout.setSpacing(15)
+        layout.setContentsMargins(20, 20, 20, 20) # Reduced margins
+        layout.setSpacing(10) # Reduced spacing
 
         self.title_label = QLabel("تسجيل الدخول")
         self.title_label.setAlignment(Qt.AlignCenter)
@@ -36,13 +36,14 @@ class LoginWindow(QWidget):
         # Clinic Logo
         self.logo_label = QLabel()
         self.logo_label.setAlignment(Qt.AlignCenter)
-        self.logo_label.setFixedSize(150, 150) # Adjust size as needed
+        self.logo_label.setFixedSize(100, 100) # Adjusted size
         self.logo_label.setScaledContents(True)
         
         settings_model = SettingsModel()
         clinic_settings = settings_model.get_clinic_settings()
-        if clinic_settings and clinic_settings[3]: # clinic_settings[3] is logo_path
-            pixmap = QPixmap(clinic_settings[3])
+        # Check if clinic_settings is a dictionary and contains 'logo_path'
+        if isinstance(clinic_settings, dict) and clinic_settings.get("logo_path"):
+            pixmap = QPixmap(clinic_settings["logo_path"])
             if not pixmap.isNull():
                 self.logo_label.setPixmap(pixmap)
             else:
@@ -51,7 +52,7 @@ class LoginWindow(QWidget):
             self.logo_label.setText("لا يوجد شعار")
 
         layout.addWidget(self.logo_label)
-        layout.addSpacing(10)
+        layout.addSpacing(5) # Reduced spacing
 
 
         username_label = QLabel("اسم المستخدم")
@@ -62,18 +63,18 @@ class LoginWindow(QWidget):
         self.user_combo.setEditable(True)
         self.user_combo.lineEdit().setReadOnly(True)
         self.user_combo.lineEdit().setAlignment(Qt.AlignCenter)
-        self.user_combo.setMinimumHeight(40)
+        self.user_combo.setMinimumHeight(35) # Adjusted height
         self.user_combo.setStyleSheet("""
             QComboBox {
-                padding: 10px;
+                padding: 8px;
                 border: 1px solid #ccc;
                 border-radius: 8px;
-                font-size: 15px;
+                font-size: 14px;
                 color: #333;
                 background-color: white;
             }
             QComboBox QAbstractItemView {
-                font-size: 14px;
+                font-size: 13px;
                 selection-background-color: #2E86DE;
                 selection-color: white;
             }
@@ -88,13 +89,13 @@ class LoginWindow(QWidget):
         self.password_input.setPlaceholderText("كلمة السر")
         self.password_input.setAlignment(Qt.AlignCenter)
         self.password_input.returnPressed.connect(self.handle_login)
-        self.password_input.setMinimumHeight(40)
+        self.password_input.setMinimumHeight(35) # Adjusted height
         self.password_input.setStyleSheet("""
             QLineEdit {
-                padding: 10px;
+                padding: 8px;
                 border: 1px solid #ccc;
                 border-radius: 8px;
-                font-size: 15px;
+                font-size: 14px;
                 color: #333;
             }
         """)
@@ -102,7 +103,7 @@ class LoginWindow(QWidget):
         self.login_button = QPushButton("تسجيل الدخول")
         self.login_button.setCursor(Qt.PointingHandCursor)
         self.login_button.clicked.connect(self.handle_login)
-        self.login_button.setMinimumHeight(45)
+        self.login_button.setMinimumHeight(40) # Adjusted height
         self.login_button.setStyleSheet("""
             QPushButton {
                 background-color: #2E86DE;
@@ -110,35 +111,38 @@ class LoginWindow(QWidget):
                 padding: 10px;
                 border: none;
                 border-radius: 8px;
-                font-size: 16px;
+                font-size: 15px;
             }
             QPushButton:hover {
                 background-color: #1B4F72;
             }
         """)
 
+        # Re-initialize layout to apply new margins/spacing
         layout = QVBoxLayout()
-        layout.setContentsMargins(50, 30, 50, 30)
-        layout.setSpacing(15)
+        layout.setContentsMargins(20, 20, 20, 20) # Reduced margins
+        layout.setSpacing(10) # Reduced spacing
         layout.addWidget(self.title_label)
-        layout.addSpacing(10)
+        layout.addSpacing(5) # Reduced spacing
+        layout.addWidget(self.logo_label)
+        layout.addSpacing(5) # Reduced spacing
         layout.addWidget(username_label)
         layout.addWidget(self.user_combo)
         layout.addWidget(password_label)
         layout.addWidget(self.password_input)
-        layout.addSpacing(15)
+        layout.addSpacing(10) # Reduced spacing
         layout.addWidget(self.login_button)
         
         # Contact info
         contact_label = QLabel("للتواصل معنا: 01550788744")
         contact_label.setAlignment(Qt.AlignCenter)
-        contact_label.setStyleSheet("font-size: 12px; color: #7f8c8d; margin-top: 10px;")
+        contact_label.setStyleSheet("font-size: 11px; color: #7f8c8d; margin-top: 5px;") # Adjusted font size and margin
         layout.addWidget(contact_label)
         
         # Copyright
         copyright_label = QLabel("جميع الحقوق محفوظة لدى د.أحمد جمال")
         copyright_label.setAlignment(Qt.AlignCenter)
-        copyright_label.setStyleSheet("font-size: 10px; color: #95a5a6; margin-top: 5px;")
+        copyright_label.setStyleSheet("font-size: 9px; color: #95a5a6; margin-top: 2px;") # Adjusted font size and margin
         layout.addWidget(copyright_label)
 
         self.setLayout(layout)
@@ -184,3 +188,7 @@ if __name__ == "__main__":
     window = LoginWindow()
     window.show()
     app.exec_()
+
+
+
+

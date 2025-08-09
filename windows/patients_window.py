@@ -79,14 +79,14 @@ class PatientsWindow(QWidget):
 
     def init_ui(self):
         layout = QVBoxLayout()
-        layout.setContentsMargins(20, 20, 20, 20)
-        layout.setSpacing(15)
+        layout.setContentsMargins(10, 10, 10, 10) # Reduced margins
+        layout.setSpacing(10) # Reduced spacing
 
         # Title
         title = QLabel("إدارة المرضى")
         title.setFont(QFont("Arial", 18, QFont.Bold))
         title.setAlignment(Qt.AlignCenter)
-        title.setStyleSheet("color: #2c3e50; margin-bottom: 10px;")
+        title.setStyleSheet("color: #2c3e50; margin-bottom: 5px;") # Reduced margin-bottom
         layout.addWidget(title)
 
         # Search and Add section
@@ -282,4 +282,6 @@ class PatientsWindow(QWidget):
                 self.load_patients()
             else:
                 QMessageBox.warning(self, "خطأ", "حدث خطأ أثناء تحديث بيانات المريض!")
+
+
 

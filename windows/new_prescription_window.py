@@ -29,14 +29,14 @@ class NewPrescriptionWindow(QWidget):
 
     def init_ui(self):
         layout = QVBoxLayout()
-        layout.setContentsMargins(20, 20, 20, 20)
-        layout.setSpacing(15)
+        layout.setContentsMargins(20, 20, 20, 280) # Reduced margins
+        layout.setSpacing(-5) # Reduced spacing
 
         # Title
         title = QLabel("إنشاء روشتة جديدة")
         title.setFont(QFont("Arial", 18, QFont.Bold))
         title.setAlignment(Qt.AlignCenter)
-        title.setStyleSheet("color: #2c3e50; margin-bottom: 10px;")
+        title.setStyleSheet("color: #2c3e50; margin-bottom: 5px;") # Reduced margin-bottom
         layout.addWidget(title)
 
         # Patient Selection/Creation
@@ -69,7 +69,7 @@ class NewPrescriptionWindow(QWidget):
         layout.addWidget(QLabel("التشخيص (اختياري):"))
         self.diagnosis_input = QTextEdit()
         self.diagnosis_input.setPlaceholderText("اكتب تشخيص المريض هنا...")
-        self.diagnosis_input.setFixedHeight(80)
+        self.diagnosis_input.setFixedHeight(60)
         layout.addWidget(self.diagnosis_input)
 
         # Medicines Section
@@ -106,13 +106,15 @@ class NewPrescriptionWindow(QWidget):
         self.medicines_table.setColumnCount(5)
         self.medicines_table.setHorizontalHeaderLabels(["الدواء", "الجرعة", "الشكل", "التعليمات", "حذف"])
         self.medicines_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        self.medicines_table.setFixedHeight(150) # Reduced fixed height for the table
         medicine_section_layout.addWidget(self.medicines_table)
         layout.addLayout(medicine_section_layout)
 
-        # Save and Print Buttons
+        # Save and Print Button (Combined)
         save_print_layout = QHBoxLayout()
-        self.save_prescription_btn = QPushButton("حفظ الروشتة")
-        self.save_prescription_btn.clicked.connect(self.save_prescription)
+        save_print_layout.addStretch(1) # Add stretch to push button to center
+        self.save_prescription_btn = QPushButton("حفظ الروشتة وطباعتها")
+        self.save_prescription_btn.clicked.connect(self.save_and_print_prescription)
         self.save_prescription_btn.setStyleSheet("""
             QPushButton {
                 background-color: #3498db;
@@ -131,27 +133,7 @@ class NewPrescriptionWindow(QWidget):
             }
         """)
         save_print_layout.addWidget(self.save_prescription_btn)
-
-        self.print_prescription_btn = QPushButton("حفظ الروشتة")
-        self.print_prescription_btn.clicked.connect(self.print_prescription)
-        self.print_prescription_btn.setStyleSheet("""
-            QPushButton {
-                background-color: #2ecc71;
-                color: white;
-                border: none;
-                padding: 12px 25px;
-                border-radius: 5px;
-                font-weight: bold;
-                font-size: 16px;
-            }
-            QPushButton:hover {
-                background-color: #27ae60;
-            }
-            QPushButton:pressed {
-                background-color: #229954;
-            }
-        """)
-        save_print_layout.addWidget(self.print_prescription_btn)
+        save_print_layout.addStretch(1) # Add stretch to push button to center
         layout.addLayout(save_print_layout)
         self.setLayout(layout)
         self.load_patients_to_combo()
@@ -261,7 +243,7 @@ class NewPrescriptionWindow(QWidget):
     def remove_medicine_from_list(self, row):
         self.medicines_table.removeRow(row)
 
-    def save_prescription(self):
+    def save_and_print_prescription(self):
         if not self.selected_patient_id:
             QMessageBox.warning(self, "خطأ", "يرجى اختيار مريض لحفظ الروشتة.")
             return
@@ -301,6 +283,29 @@ class NewPrescriptionWindow(QWidget):
 
         if success:
             QMessageBox.information(self, "نجح", "تم حفظ الروشتة بنجاح!")
+            # Now generate and save PDF
+            prescription_data = {
+                "patient_name": patient[1],
+                "date": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                "diagnosis": diagnosis,
+                "medicines": medicines_data
+            }
+
+            settings_model = SettingsModel()
+            clinic_settings = settings_model.get_clinic_settings()
+            print_settings = settings_model.get_print_settings()
+
+            default_file_name = f"prescription_{patient[1].replace(' ', '_')}_{datetime.now().strftime('%Y%m%d%H%M%S')}.pdf"
+            file_path, _ = QFileDialog.getSaveFileName(self, "حفظ الروشتة كـ PDF", default_file_name, "PDF Files (*.pdf)")
+
+            if file_path:
+                try:
+                    generate_prescription_pdf(file_path, prescription_data, clinic_settings, print_settings)
+                    QMessageBox.information(self, "نجح", f"تم حفظ الروشتة بنجاح في: {file_path}")
+                    # os.startfile(file_path) # This might not work in all environments (e.g., Linux without specific desktop environment setup)
+                except Exception as e:
+                    QMessageBox.critical(self, "خطأ", f"حدث خطأ أثناء حفظ الروشتة كـ PDF: {e}")
+            
             # Clear form after saving
             self.selected_patient_id = None
             self.patient_combo.setCurrentIndex(0)
@@ -308,60 +313,7 @@ class NewPrescriptionWindow(QWidget):
             self.diagnosis_input.clear()
             self.medicines_table.setRowCount(0)
         else:
-            QMessageBox.warning(self, "خطأ", "حدث خطأ أثناء حفظ الروشتة!")
-
-    def print_prescription(self):
-        if not self.selected_patient_id:
-            QMessageBox.warning(self, "خطأ", "يرجى اختيار مريض لحفظ الروشتة.")
-            return
-
-        diagnosis = self.diagnosis_input.toPlainText().strip()
-
-        if self.medicines_table.rowCount() == 0:
-            QMessageBox.warning(self, "خطأ", "يرجى إضافة دواء واحد على الأقل للروشتة لحفظها.")
-            return
-
-        patient = self.patient_model.get_patient_by_id(self.selected_patient_id)
-        if not patient:
-            QMessageBox.warning(self, "خطأ", "بيانات المريض غير موجودة.")
-            return
-
-        medicines_data = []
-        for row in range(self.medicines_table.rowCount()):
-            medicine_id = self.medicines_table.item(row, 0).data(Qt.UserRole)
-            medicine_name = self.medicines_table.item(row, 0).text()
-            dosage = self.medicines_table.item(row, 1).text()
-            form = self.medicines_table.item(row, 2).text()
-            instructions = self.medicines_table.item(row, 3).text()
-            medicines_data.append({
-                "medicine_id": medicine_id,
-                "medicine_name": medicine_name,
-                "dosage": dosage,
-                "form": form,
-                "instructions": instructions
-            })
-
-        prescription_data = {
-            "patient_name": patient["name"],
-            "date": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-            "diagnosis": diagnosis,
-            "medicines": medicines_data
-        }
-
-        settings_model = SettingsModel()
-        clinic_settings = settings_model.get_clinic_settings()
-        print_settings = settings_model.get_print_settings()
-
-        default_file_name = f"prescription_{patient['name'].replace(' ', '_')}_{datetime.now().strftime('%Y%m%d%H%M%S')}.pdf"
-        file_path, _ = QFileDialog.getSaveFileName(self, "حفظ الروشتة كـ PDF", default_file_name, "PDF Files (*.pdf)")
-
-        if file_path:
-            try:
-                generate_prescription_pdf(file_path, prescription_data, clinic_settings, print_settings)
-                QMessageBox.information(self, "نجح", f"تم حفظ الروشتة بنجاح في: {file_path}")
-                os.startfile(file_path)
-            except Exception as e:
-                QMessageBox.critical(self, "خطأ", f"حدث خطأ أثناء حفظ الروشتة: {e}")
+            QMessageBox.warning(self, "خطأ", "حدث خطأ أثناء حفظ الروشتة في قاعدة البيانات!")
 
     def load_templates_to_combo(self):
         self.template_combo.clear()
@@ -369,6 +321,9 @@ class NewPrescriptionWindow(QWidget):
         templates = self.template_model.get_all_templates()
         for template in templates:
             self.template_combo.addItem(template["name"], template["id"])
+
+    def on_template_combo_selected(self, index):
+        pass # No direct action on selection, only when 'Load from Template' button is clicked
 
     def load_template_medicines(self):
         template_id = self.template_combo.itemData(self.template_combo.currentIndex())
@@ -381,40 +336,29 @@ class NewPrescriptionWindow(QWidget):
         if reply == QMessageBox.No:
             return
 
-        template = self.template_model.get_template_by_id(template_id)
-        if template and template["items"]:
-            self.medicines_table.setRowCount(0) # Clear existing medicines
-            for item in template["items"]:
-                medicine = self.drug_model.get_medicine_by_id(item["medicine_id"])
-                if medicine:
-                    row_position = self.medicines_table.rowCount()
-                    self.medicines_table.insertRow(row_position)
-                    self.medicines_table.setItem(row_position, 0, QTableWidgetItem(medicine["name"]))
-                    self.medicines_table.setItem(row_position, 1, QTableWidgetItem(item["dosage"] or ""))
-                    self.medicines_table.setItem(row_position, 2, QTableWidgetItem(item["form"] or ""))
-                    self.medicines_table.setItem(row_position, 3, QTableWidgetItem(item["instructions"] or ""))
+        # Use get_template_by_id and access 'items' key
+        template_data = self.template_model.get_template_by_id(template_id)
+        if not template_data or not template_data.get('items'):
+            QMessageBox.information(self, "معلومة", "لا توجد أدوية في هذه الأسطمبة.")
+            return
 
-                    delete_btn = QPushButton("حذف")
-                    delete_btn.clicked.connect(lambda _, r=row_position: self.remove_medicine_from_list(r))
-                    self.medicines_table.setCellWidget(row_position, 4, delete_btn)
+        template_items = template_data['items']
 
-                    self.medicines_table.item(row_position, 0).setData(Qt.UserRole, item["medicine_id"])
-        else:
-            QMessageBox.information(self, "معلومات", "الأسطمبة المختارة لا تحتوي على أدوية.")
+        self.medicines_table.setRowCount(0) # Clear existing medicines
+        for item in template_items:
+            medicine = self.drug_model.get_medicine_by_id(item["medicine_id"])
+            if medicine:
+                row_position = self.medicines_table.rowCount()
+                self.medicines_table.insertRow(row_position)
+                self.medicines_table.setItem(row_position, 0, QTableWidgetItem(medicine[1])) # medicine name
+                self.medicines_table.setItem(row_position, 1, QTableWidgetItem(item["dosage"])) # dosage from template
+                self.medicines_table.setItem(row_position, 2, QTableWidgetItem(medicine[3])) # form from medicine
+                self.medicines_table.setItem(row_position, 3, QTableWidgetItem(item["instructions"])) # instructions from template
 
+                delete_btn = QPushButton("حذف")
+                delete_btn.clicked.connect(lambda _, r=row_position: self.remove_medicine_from_list(r))
+                self.medicines_table.setCellWidget(row_position, 4, delete_btn)
 
-
-
-
-    def on_template_combo_selected(self, index):
-        template_id = self.template_combo.itemData(index)
-        if template_id:
-            template = self.template_model.get_template_by_id(template_id)
-            if template:
-                self.template_combo.setToolTip(template["name"])
-            else:
-                self.template_combo.setToolTip("")
-        else:
-            self.template_combo.setToolTip("")
+                self.medicines_table.item(row_position, 0).setData(Qt.UserRole, medicine[0])
 
 

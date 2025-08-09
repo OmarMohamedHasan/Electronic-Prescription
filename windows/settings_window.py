@@ -1,7 +1,7 @@
 from PyQt5.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QStackedWidget,
     QTableWidget, QTableWidgetItem, QHeaderView, QLineEdit, QMessageBox,
-    QFormLayout, QDialog, QDialogButtonBox, QFileDialog, QComboBox
+    QFormLayout, QDialog, QDialogButtonBox, QFileDialog, QComboBox, QGroupBox
 )
 from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.QtGui import QFont, QPixmap
@@ -66,13 +66,13 @@ class UserManagementPage(QWidget):
 
     def init_ui(self):
         layout = QVBoxLayout()
-        layout.setContentsMargins(20, 20, 20, 20)
-        layout.setSpacing(15)
+        layout.setContentsMargins(10, 10, 10, 10) # Reduced margins
+        layout.setSpacing(10) # Reduced spacing
 
         title = QLabel("إدارة المستخدمين")
         title.setFont(QFont("Arial", 18, QFont.Bold))
         title.setAlignment(Qt.AlignCenter)
-        title.setStyleSheet("color: #2c3e50; margin-bottom: 10px;")
+        title.setStyleSheet("color: #2c3e50; margin-bottom: 5px;") # Reduced margin-bottom
         layout.addWidget(title)
 
         add_user_btn = QPushButton("➕ إضافة مستخدم جديد")
@@ -186,13 +186,13 @@ class ClinicSettingsPage(QWidget):
 
     def init_ui(self):
         layout = QVBoxLayout()
-        layout.setContentsMargins(20, 20, 20, 20)
-        layout.setSpacing(15)
+        layout.setContentsMargins(10, 10, 10, 10) # Reduced margins
+        layout.setSpacing(10) # Reduced spacing
 
         title = QLabel("بيانات العيادة")
         title.setFont(QFont("Arial", 18, QFont.Bold))
         title.setAlignment(Qt.AlignCenter)
-        title.setStyleSheet("color: #2c3e50; margin-bottom: 10px;")
+        title.setStyleSheet("color: #2c3e50; margin-bottom: 5px;") # Reduced margin-bottom
         layout.addWidget(title)
 
         form_layout = QFormLayout()
@@ -200,6 +200,8 @@ class ClinicSettingsPage(QWidget):
         self.doctor_name_input = QLineEdit()
         self.clinic_address_input = QLineEdit()
         self.phone_numbers_input = QLineEdit()
+        self.clinic_email_input = QLineEdit()
+        self.clinic_website_input = QLineEdit()
         self.logo_path_input = QLineEdit()
         self.logo_path_input.setReadOnly(True)
         self.signature_path_input = QLineEdit()
@@ -220,6 +222,8 @@ class ClinicSettingsPage(QWidget):
         form_layout.addRow("اسم الطبيب:", self.doctor_name_input)
         form_layout.addRow("عنوان العيادة:", self.clinic_address_input)
         form_layout.addRow("أرقام التواصل:", self.phone_numbers_input)
+        form_layout.addRow("البريد الإلكتروني:", self.clinic_email_input)
+        form_layout.addRow("الموقع الإلكتروني:", self.clinic_website_input)
         form_layout.addRow("شعار العيادة:", logo_layout)
         form_layout.addRow("التوقيع الإلكتروني:", signature_layout)
 
@@ -256,20 +260,24 @@ class ClinicSettingsPage(QWidget):
     def load_settings(self):
         settings = self.settings_model.get_clinic_settings()
         if settings:
-            self.doctor_name_input.setText(settings[0] or "")
-            self.clinic_address_input.setText(settings[1] or "")
-            self.phone_numbers_input.setText(settings[2] or "")
-            self.logo_path_input.setText(settings[3] or "")
-            self.signature_path_input.setText(settings[4] or "")
+            self.doctor_name_input.setText(settings.get("doctor_name", "") or "")
+            self.clinic_address_input.setText(settings.get("clinic_address", "") or "")
+            self.phone_numbers_input.setText(settings.get("phone_numbers", "") or "")
+            self.clinic_email_input.setText(settings.get("clinic_email", "") or "")
+            self.clinic_website_input.setText(settings.get("clinic_website", "") or "")
+            self.logo_path_input.setText(settings.get("logo_path", "") or "")
+            self.signature_path_input.setText(settings.get("signature_path", "") or "")
 
     def save_settings(self):
         doctor_name = self.doctor_name_input.text().strip()
         clinic_address = self.clinic_address_input.text().strip()
         phone_numbers = self.phone_numbers_input.text().strip()
+        clinic_email = self.clinic_email_input.text().strip()
+        clinic_website = self.clinic_website_input.text().strip()
         logo_path = self.logo_path_input.text().strip()
         signature_path = self.signature_path_input.text().strip()
 
-        if self.settings_model.save_clinic_settings(doctor_name, clinic_address, phone_numbers, logo_path, signature_path):
+        if self.settings_model.save_clinic_settings(doctor_name, clinic_address, phone_numbers, logo_path, signature_path, clinic_email, clinic_website):
             QMessageBox.information(self, "نجح", "تم حفظ بيانات العيادة بنجاح!")
         else:
             QMessageBox.warning(self, "خطأ", "حدث خطأ أثناء حفظ البيانات.")
@@ -283,13 +291,13 @@ class PrintSettingsPage(QWidget):
 
     def init_ui(self):
         layout = QVBoxLayout()
-        layout.setContentsMargins(20, 20, 20, 20)
-        layout.setSpacing(15)
+        layout.setContentsMargins(10, 10, 10, 10) # Reduced margins
+        layout.setSpacing(10) # Reduced spacing
 
         title = QLabel("إعدادات الطباعة")
         title.setFont(QFont("Arial", 18, QFont.Bold))
         title.setAlignment(Qt.AlignCenter)
-        title.setStyleSheet("color: #2c3e50; margin-bottom: 10px;")
+        title.setStyleSheet("color: #2c3e50; margin-bottom: 5px;") # Reduced margin-bottom
         layout.addWidget(title)
 
         form_layout = QFormLayout()
@@ -298,12 +306,49 @@ class PrintSettingsPage(QWidget):
         self.logo_position_combo.addItems(["أعلى اليمين", "أعلى الوسط", "أعلى اليسار"])
 
         self.print_template_combo = QComboBox()
-        self.print_template_combo.addItems(["النموذج الافتراضي 1", "النموذج 2 (بدون توقيع)"])
+        # This combo box will be populated dynamically with print templates
+        self.print_template_combo.currentIndexChanged.connect(self.on_template_selected)
 
         form_layout.addRow("موضع الشعار:", self.logo_position_combo)
         form_layout.addRow("نموذج الطباعة:", self.print_template_combo)
 
         layout.addLayout(form_layout)
+
+        # Template Management Section
+        template_group_box = QGroupBox("إدارة قوالب الطباعة")
+        template_layout = QVBoxLayout()
+
+        add_template_layout = QHBoxLayout()
+        self.template_name_input = QLineEdit()
+        self.template_name_input.setPlaceholderText("اسم القالب")
+        self.template_path_input = QLineEdit()
+        self.template_path_input.setReadOnly(True)
+        template_browse_btn = QPushButton("استعراض...")
+        template_browse_btn.clicked.connect(lambda: self.browse_file(self.template_path_input, "Image Files (*.jpg *.jpeg *.png)"))
+        add_template_btn = QPushButton("➕ إضافة قالب")
+        add_template_btn.clicked.connect(self.add_print_template)
+
+        add_template_layout.addWidget(self.template_name_input)
+        add_template_layout.addWidget(self.template_path_input)
+        add_template_layout.addWidget(template_browse_btn)
+        add_template_layout.addWidget(add_template_btn)
+        template_layout.addLayout(add_template_layout)
+
+        self.templates_table = QTableWidget()
+        self.templates_table.setColumnCount(3)
+        self.templates_table.setHorizontalHeaderLabels(["الرقم", "الاسم", "الإجراءات"])
+        self.templates_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        self.templates_table.setSelectionBehavior(QTableWidget.SelectRows)
+        template_layout.addWidget(self.templates_table)
+
+        self.template_preview_label = QLabel("معاينة القالب")
+        self.template_preview_label.setAlignment(Qt.AlignCenter)
+        self.template_preview_label.setFixedSize(300, 400) # Fixed size for preview
+        self.template_preview_label.setStyleSheet("border: 1px solid #ccc; background-color: #f0f0f0;")
+        template_layout.addWidget(self.template_preview_label)
+
+        template_group_box.setLayout(template_layout)
+        layout.addWidget(template_group_box)
 
         save_btn = QPushButton("حفظ إعدادات الطباعة")
         save_btn.clicked.connect(self.save_settings)
@@ -327,70 +372,154 @@ class PrintSettingsPage(QWidget):
         layout.addWidget(save_btn, alignment=Qt.AlignRight)
 
         self.setLayout(layout)
+        self.load_print_templates()
+
+    def browse_file(self, line_edit, file_filter):
+        file_path, _ = QFileDialog.getOpenFileName(self, "اختر ملف", "", file_filter)
+        if file_path:
+            line_edit.setText(file_path)
 
     def load_settings(self):
         settings = self.settings_model.get_print_settings()
         if settings:
-            self.logo_position_combo.setCurrentText(settings[0] or "أعلى اليمين")
-            self.print_template_combo.setCurrentText(settings[1] or "النموذج الافتراضي 1")
+            self.logo_position_combo.setCurrentText(settings.get("logo_position", "أعلى اليمين") or "أعلى اليمين")
+            # Set selected template in combo box
+            selected_template_id = settings.get("selected_template_id")
+            if selected_template_id:
+                index = self.print_template_combo.findData(selected_template_id)
+                if index != -1:
+                    self.print_template_combo.setCurrentIndex(index)
+            self.on_template_selected(self.print_template_combo.currentIndex()) # Load preview for current template
 
     def save_settings(self):
         logo_position = self.logo_position_combo.currentText()
-        print_template_style = self.print_template_combo.currentText()
+        selected_template_id = self.print_template_combo.currentData()
 
-        if self.settings_model.save_print_settings(logo_position, print_template_style):
+        if self.settings_model.save_print_settings(logo_position, selected_template_id):
             QMessageBox.information(self, "نجح", "تم حفظ إعدادات الطباعة بنجاح!")
         else:
             QMessageBox.warning(self, "خطأ", "حدث خطأ أثناء حفظ البيانات.")
 
-class SettingsPage(QWidget):
-    def __init__(self, current_user_id=None):
+    def load_print_templates(self):
+        self.print_template_combo.clear()
+        self.print_template_combo.addItem("لا يوجد قالب", None)
+        self.templates_table.setRowCount(0)
+        templates = self.settings_model.get_all_print_templates()
+        for template in templates:
+            # Populate combo box
+            self.print_template_combo.addItem(template["name"], template["id"])
+
+            # Populate table
+            row_position = self.templates_table.rowCount()
+            self.templates_table.insertRow(row_position)
+            self.templates_table.setItem(row_position, 0, QTableWidgetItem(str(template["id"])))
+            self.templates_table.setItem(row_position, 1, QTableWidgetItem(template["name"]))
+
+            actions_widget = QWidget()
+            actions_layout = QHBoxLayout()
+            actions_layout.setContentsMargins(0, 0, 0, 0)
+            actions_layout.setSpacing(5)
+
+            delete_btn = QPushButton("حذف")
+            delete_btn.clicked.connect(lambda _, t_id=template["id"]: self.delete_print_template(t_id))
+            actions_layout.addWidget(delete_btn)
+
+            actions_widget.setLayout(actions_layout)
+            self.templates_table.setCellWidget(row_position, 2, actions_widget)
+
+    def add_print_template(self):
+        name = self.template_name_input.text().strip()
+        path = self.template_path_input.text().strip()
+
+        if not name or not path:
+            QMessageBox.warning(self, "خطأ", "يرجى إدخال اسم ومسار القالب.")
+            return
+        
+        if not os.path.exists(path):
+            QMessageBox.warning(self, "خطأ", "مسار القالب غير صحيح.")
+            return
+
+        if self.settings_model.add_print_template(name, path):
+            QMessageBox.information(self, "نجح", "تم إضافة القالب بنجاح!")
+            self.template_name_input.clear()
+            self.template_path_input.clear()
+            self.load_print_templates()
+        else:
+            QMessageBox.warning(self, "خطأ", "حدث خطأ أثناء إضافة القالب.")
+
+    def delete_print_template(self, template_id):
+        reply = QMessageBox.question(self, "تأكيد الحذف", "هل أنت متأكد من حذف هذا القالب؟",
+                                     QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+        if reply == QMessageBox.Yes:
+            if self.settings_model.delete_print_template(template_id):
+                QMessageBox.information(self, "نجح", "تم حذف القالب بنجاح!")
+                self.load_print_templates()
+            else:
+                QMessageBox.warning(self, "خطأ", "حدث خطأ أثناء حذف القالب.")
+
+    def on_template_selected(self, index):
+        template_id = self.print_template_combo.itemData(index)
+        if template_id:
+            template = self.settings_model.get_print_template_by_id(template_id)
+            if template and os.path.exists(template["path"]):
+                pixmap = QPixmap(template["path"])
+                if not pixmap.isNull():
+                    self.template_preview_label.setPixmap(pixmap.scaled(self.template_preview_label.size(), Qt.KeepAspectRatio, Qt.SmoothTransformation))
+                else:
+                    self.template_preview_label.setText("فشل تحميل الصورة")
+            else:
+                self.template_preview_label.setText("مسار القالب غير صحيح أو غير موجود")
+        else:
+            self.template_preview_label.setText("معاينة القالب")
+
+
+class SettingsWindow(QWidget):
+    def __init__(self):
         super().__init__()
-        self.current_user_id = current_user_id
         self.init_ui()
 
     def init_ui(self):
-        main_layout = QVBoxLayout()
-        main_layout.setContentsMargins(0, 0, 0, 0)
+        main_layout = QHBoxLayout()
+        main_layout.setContentsMargins(10, 10, 10, 10) # Reduced margins
+        main_layout.setSpacing(10) # Reduced spacing
 
-        # Header for navigation within settings
-        header_layout = QHBoxLayout()
-        header_layout.setContentsMargins(20, 10, 20, 10)
-        header_layout.setSpacing(10)
+        # Left Panel (Navigation)
+        left_panel = QVBoxLayout()
+        left_panel.setContentsMargins(0, 0, 5, 0) # Reduced right margin
 
         self.user_management_btn = QPushButton("إدارة المستخدمين")
-        self.user_management_btn.clicked.connect(lambda: self.pages.setCurrentWidget(self.user_management_page))
-        self.user_management_btn.setStyleSheet("font-size: 16px; padding: 10px; border-radius: 5px;")
-        header_layout.addWidget(self.user_management_btn)
-
         self.clinic_settings_btn = QPushButton("بيانات العيادة")
-        self.clinic_settings_btn.clicked.connect(lambda: self.pages.setCurrentWidget(self.clinic_settings_page))
-        self.clinic_settings_btn.setStyleSheet("font-size: 16px; padding: 10px; border-radius: 5px;")
-        header_layout.addWidget(self.clinic_settings_btn)
-
         self.print_settings_btn = QPushButton("إعدادات الطباعة")
-        self.print_settings_btn.clicked.connect(lambda: self.pages.setCurrentWidget(self.print_settings_page))
-        self.print_settings_btn.setStyleSheet("font-size: 16px; padding: 10px; border-radius: 5px;")
-        header_layout.addWidget(self.print_settings_btn)
 
-        header_layout.addStretch(1)
-        main_layout.addLayout(header_layout)
+        self.user_management_btn.clicked.connect(lambda: self.stacked_widget.setCurrentIndex(0))
+        self.clinic_settings_btn.clicked.connect(lambda: self.stacked_widget.setCurrentIndex(1))
+        self.print_settings_btn.clicked.connect(lambda: self.stacked_widget.setCurrentIndex(2))
 
-        # Stacked widget for different settings pages
-        self.pages = QStackedWidget()
+        left_panel.addWidget(self.user_management_btn)
+        left_panel.addWidget(self.clinic_settings_btn)
+        left_panel.addWidget(self.print_settings_btn)
+        left_panel.addStretch(1)
+
+        main_layout.addLayout(left_panel)
+
+        # Right Panel (Content)
+        self.stacked_widget = QStackedWidget()
+        self.stacked_widget.setContentsMargins(5, 0, 0, 0) # Reduced left margin
 
         self.user_management_page = UserManagementPage()
         self.clinic_settings_page = ClinicSettingsPage()
         self.print_settings_page = PrintSettingsPage()
 
-        self.pages.addWidget(self.user_management_page)
-        self.pages.addWidget(self.clinic_settings_page)
-        self.pages.addWidget(self.print_settings_page)
+        self.stacked_widget.addWidget(self.user_management_page)
+        self.stacked_widget.addWidget(self.clinic_settings_page)
+        self.stacked_widget.addWidget(self.print_settings_page)
 
-        main_layout.addWidget(self.pages)
+        main_layout.addWidget(self.stacked_widget)
         self.setLayout(main_layout)
 
         # Set initial page
-        self.pages.setCurrentWidget(self.user_management_page)
+        self.stacked_widget.setCurrentIndex(0)
+
+
 
 

@@ -20,14 +20,14 @@ class PrescriptionsWindow(QWidget):
 
     def init_ui(self):
         layout = QVBoxLayout()
-        layout.setContentsMargins(20, 20, 20, 20)
-        layout.setSpacing(15)
+        layout.setContentsMargins(10, 10, 10, 10) # Reduced margins
+        layout.setSpacing(10) # Reduced spacing
 
         # Title
         title = QLabel("عرض الروشتات")
         title.setFont(QFont("Arial", 18, QFont.Bold))
         title.setAlignment(Qt.AlignCenter)
-        title.setStyleSheet("color: #2c3e50; margin-bottom: 10px;")
+        title.setStyleSheet("color: #2c3e50; margin-bottom: 5px;") # Reduced margin-bottom
         layout.addWidget(title)
 
         # Search and Filter section
@@ -215,7 +215,7 @@ class PrescriptionsWindow(QWidget):
             return
 
         # Prepare data for PDF
-        # Access 'prescription' and 'items' keys from the dictionary
+        # Access \'prescription\' and \'items\' keys from the dictionary
         prescription_info = prescription_details["prescription"]
         prescription_items = prescription_details["items"]
 
@@ -226,7 +226,7 @@ class PrescriptionsWindow(QWidget):
         medicines_data = []
         for item in prescription_items:
             medicines_data.append({
-                "medicine_name": item["name"], # Assuming 'name' is the key for medicine name in items
+                "medicine_name": item["name"], # Assuming \'name\' is the key for medicine name in items
                 "dosage": item["dosage"],
                 "duration": item["duration"],
                 "instructions": item["instructions"]
@@ -254,5 +254,7 @@ class PrescriptionsWindow(QWidget):
             QMessageBox.information(self, "نجح", f"تم إنشاء الروشتة بنجاح في: {file_path}")
         except Exception as e:
             QMessageBox.critical(self, "خطأ", f"حدث خطأ أثناء طباعة الروشتة: {e}")
+
+
 
 
